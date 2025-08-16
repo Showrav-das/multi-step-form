@@ -1,0 +1,268 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Form } from "@/components/ui/form"
+// import { JobDetailsStep } from "./onboarding-steps/job-details-step"
+// import { SkillsPreferencesStep } from "./onboarding-steps/skills-preferences-step"
+// import { EmergencyContactStep } from "./onboarding-steps/emergency-contact-step"
+// import { ReviewSubmitStep } from "./onboarding-steps/review-submit-step"
+
+import {
+    personalInfoSchema,
+
+    jobDetailsSchema,
+    skillsPreferencesSchema,
+    emergencyContactSchema,
+    reviewSubmitSchema,
+    type FormData,
+} from "@/lib/validateSchemas"
+import { toast } from "sonner"
+import { PersonalInfoStep } from "./CustomComponent/PersonalInfoForm"
+import { JobDetailsStep } from "./CustomComponent/JobDetailsForm"
+import { SkillsPreferencesStep } from "./CustomComponent/SkillPeference"
+import { EmergencyContactStep } from "./CustomComponent/ContactInformation"
+import { ReviewSubmitStep } from "./CustomComponent/Review&FinalSubmit"
+
+
+const completeFormSchema = personalInfoSchema
+    .merge(jobDetailsSchema)
+    .merge(skillsPreferencesSchema)
+    .merge(emergencyContactSchema)
+    .merge(reviewSubmitSchema)
+
+const initialFormData: FormData = {
+    fullName: "",
+    email: "",
+    phone: "",
+    dateOfBirth: "",
+    profilePicture: null,
+    department: "",
+    position: "",
+    startDate: "",
+    jobType: "full-time",
+    salary: "",
+    manager: "",
+    skills: [],
+    workingHours: { start: "09:00", end: "17:00" },
+    remotePreference: 0,
+    managerApproved: false,
+    notes: "",
+    emergencyContact: {
+        name: "",
+        relationship: "",
+        phone: "",
+    },
+    confirmed: false,
+}
+
+const steps = [
+    { id: 1, title: "Personal Info", description: "Basic personal information" },
+    { id: 2, title: "Job Details", description: "Position and department details" },
+    { id: 3, title: "Skills & Preferences", description: "Skills and work preferences" },
+    { id: 4, title: "Emergency Contact", description: "Emergency contact information" },
+    { id: 5, title: "Review & Submit", description: "Review and confirm details" },
+]
+
+export function EmployeeOnboardingForm() {
+    const [currentStep, setCurrentStep] = useState(1)
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+
+    const form = useForm<FormData>({
+        resolver: zodResolver(completeFormSchema),
+        defaultValues: initialFormData,
+        // mode: "onChange",
+    })
+
+    const { watch, trigger, getValues, reset } = form
+
+    const formValues = watch()
+
+    useEffect(() => {
+        const savedData = localStorage.getItem("employee-onboarding-form")
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                reset(parsed)
+            } catch (error) {
+                console.error("Failed to parse saved form data:", error)
+            }
+        }
+    }, [reset])
+
+    useEffect(() => {
+        localStorage.setItem("employee-onboarding-form", JSON.stringify(formValues))
+        setHasUnsavedChanges(true)
+    }, [formValues])
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault()
+                e.returnValue = ""
+            }
+        }
+
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [hasUnsavedChanges])
+
+    const validateStep = async (step: number): Promise<boolean> => {
+        const fieldsToValidate = getFieldsForStep(step)
+        const isValid = await trigger(fieldsToValidate)
+
+        if (!isValid) {
+            const errors = form.formState.errors
+            const firstError = Object.values(errors)[0]
+            if (firstError?.message) {
+                toast('validation error')
+            }
+        }
+
+        return isValid
+    }
+
+    const getFieldsForStep = (step: number): (keyof FormData)[] => {
+        switch (step) {
+            case 1:
+                return ["fullName", "email", "phone", "dateOfBirth"]
+            case 2:
+                return ["department", "position", "startDate", "jobType", "salary", "manager"]
+            case 3:
+                return ["skills", "workingHours", "remotePreference"]
+            case 4:
+                return ["emergencyContact"]
+            case 5:
+                return ["confirmed"]
+            default:
+                return []
+        }
+    }
+
+    const calculateAge = (dateOfBirth: string): number => {
+        if (!dateOfBirth) return 0
+        const today = new Date()
+        const birthDate = new Date(dateOfBirth)
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age
+    }
+
+    const handleNext = async () => {
+        const isValid = await validateStep(currentStep)
+        if (isValid) {
+            setCurrentStep((prev) => Math.min(prev + 1, 5))
+        }
+    }
+
+    const handlePrevious = () => {
+        setCurrentStep((prev) => Math.max(prev - 1, 1))
+    }
+
+    const onSubmit = (data: FormData) => {
+        const transformedData = {
+            ...data,
+            phone: data.phone.replace(/\D/g, ""),
+            salary: Number.parseFloat(data.salary),
+            age: calculateAge(data.dateOfBirth),
+            isMinor: calculateAge(data.dateOfBirth) < 21,
+        }
+
+        console.log("Submitting transformed data:", transformedData)
+        localStorage.removeItem("employee-onboarding-form")
+        setHasUnsavedChanges(false)
+
+        toast("Your onboarding form has been submitted successfully.")
+    }
+
+    const renderStep = () => {
+        switch (currentStep) {
+            case 1:
+                return <PersonalInfoStep form={form} />
+            case 2:
+                return <JobDetailsStep form={form} />
+            case 3:
+                return <SkillsPreferencesStep form={form} />
+            case 4:
+                return <EmergencyContactStep form={form} />
+            case 5:
+                return <ReviewSubmitStep form={form} />
+            default:
+                return null
+        }
+    }
+
+    const progress = (currentStep / steps.length) * 100
+
+    return (
+        <div className="space-y-3 max-w-6xl mx-auto my-12">
+            <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>
+                        Step {currentStep} of {steps.length}
+                    </span>
+                    <span>{Math.round(progress)}% Complete</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+            </div>
+
+            <div className="flex justify-between">
+                {steps.map((step) => (
+                    <div
+                        key={step.id}
+                        className={`flex flex-col items-center space-y-2 ${step.id <= currentStep ? "text-primary" : "text-muted-foreground"
+                            }`}
+                    >
+                        <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step.id < currentStep
+                                ? "bg-primary text-primary-foreground"
+                                : step.id === currentStep
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground"
+                                }`}
+                        >
+                            {step.id < currentStep ? "✓" : step.id}
+                        </div>
+                        <div className="text-center">
+                            <div className="text-xs font-medium">{step.title}</div>
+                            <div className="text-xs hidden sm:block">{step.description}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{steps[currentStep - 1].title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>{renderStep()}</CardContent>
+                    </Card>
+
+                    <div className="flex justify-between mt-6">
+                        <Button type="button" variant="outline" onClick={handlePrevious} disabled={currentStep === 1}>
+                            Previous
+                        </Button>
+
+                        {currentStep < 5 ? (
+                            <Button type="button" onClick={handleNext}>
+                                Next
+                            </Button>
+                        ) : (
+                            <Button type="submit">Submit Application</Button>
+                        )}
+                    </div>
+                </form>
+            </Form>
+        </div>
+    )
+}
