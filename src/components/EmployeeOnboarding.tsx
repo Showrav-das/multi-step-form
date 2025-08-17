@@ -195,33 +195,9 @@ export function EmployeeOnboardingForm() {
 
     return (
         <div className="space-y-3 max-w-6xl mx-auto my-12">
+            {/* /stepper */}
             <Stepper currentStep={currentStep} progress={progress} steps={steps} />
-
-            <div className="flex justify-between">
-                {steps.map((step) => (
-                    <div
-                        key={step.id}
-                        className={`flex flex-col items-center space-y-2 ${step.id <= currentStep ? "text-primary" : "text-muted-foreground"
-                            }`}
-                    >
-                        <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step.id < currentStep
-                                ? "bg-primary text-primary-foreground"
-                                : step.id === currentStep
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
-                                }`}
-                        >
-                            {step.id < currentStep ? "✓" : step.id}
-                        </div>
-                        <div className="text-center">
-                            <div className="text-xs font-medium">{step.title}</div>
-                            <div className="text-xs hidden sm:block">{step.description}</div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
+            {/* form render */}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Card>
