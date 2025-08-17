@@ -22,15 +22,16 @@ export const personalInfoSchema = z.object({
       message: "Please enter both first and last name",
     }),
   email: z.string().email("Please enter a valid email address"),
-  phone: z.string().refine(
-    (phone) => {
-      const digits = phone.replace(/\D/g, "")
-      return digits.length === 11 && digits.startsWith("1")
-    },
-    {
-      message: "Please enter a valid US phone number",
-    },
-  ),
+  phone: z.string().optional(),
+//   .refine(
+//     (phone) => {
+//       const digits = phone.replace(/\D/g, "")
+//       return digits.length === 11 && digits.startsWith("1")
+//     },
+//     {
+//       message: "Please enter a valid US phone number",
+//     },
+//   ),
   dateOfBirth: z
     .string()
     .min(1, "Date of birth is required")

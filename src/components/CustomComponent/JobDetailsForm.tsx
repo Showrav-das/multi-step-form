@@ -12,26 +12,35 @@ interface JobDetailsStepProps {
 
 const departments = ["Engineering", "Marketing", "Sales", "HR", "Finance", "Operations", "Design"]
 
-const managersByDepartment: Record<string, string[]> = {
-    Engineering: ["Sarah Chen", "Mike Johnson", "Alex Rodriguez"],
-    Marketing: ["Emma Wilson", "David Park", "Lisa Thompson"],
-    Sales: ["John Smith", "Maria Garcia", "Tom Brown"],
-    HR: ["Jennifer Lee", "Robert Davis"],
-    Finance: ["Amanda White", "Kevin Miller"],
-    Operations: ["Rachel Green", "Steve Wilson"],
-    Design: ["Maya Patel", "Chris Taylor"],
-}
+const mockManagers = [
+    { id: "ENG001", name: "Alice Johnson", department: "Engineering" },
+    { id: "ENG002", name: "Tanvir Ahamed", department: "Engineering" },
+    { id: "ENG003", name: "Lisa Wong", department: "Engineering" },
+    { id: "MKT001", name: "Sarah Kim", department: "Marketing" },
+    { id: "MKT002", name: "John Patel", department: "Marketing" },
+    { id: "MKT003", name: "Nina Roy", department: "Marketing" },
+    { id: "SAL001", name: "David Lee", department: "Sales" },
+    { id: "SAL002", name: "Maria Gomez", department: "Sales" },
+    { id: "SAL003", name: "Rahul Sinha", department: "Sales" },
+    { id: "HR001", name: "Emma Brown", department: "HR" },
+    { id: "HR002", name: "Hasan Chowdhury", department: "HR" },
+    { id: "FIN001", name: "Olivia Green", department: "Finance" },
+    { id: "FIN002", name: "Jake Turner", department: "Finance" },
+    { id: "FIN003", name: "Nadia Rahman", department: "Finance" },
+]
 
 export function JobDetailsStep({ form }: JobDetailsStepProps) {
-    const [filteredManagers, setFilteredManagers] = useState<string[]>([])
+    const [filteredManagers, setFilteredManagers] = useState<typeof mockManagers>([])
 
     const department = form.watch("department")
     const jobType = form.watch("jobType")
 
     useEffect(() => {
         if (department) {
-            const managers = managersByDepartment[department] || []
+            const managers = mockManagers.filter((m) => m.department === department)
             setFilteredManagers(managers)
+        } else {
+            setFilteredManagers([])
         }
     }, [department])
 
@@ -60,6 +69,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Department */}
                 <FormField
                     control={form.control}
                     name="department"
@@ -91,6 +101,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                     )}
                 />
 
+                {/* Position */}
                 <FormField
                     control={form.control}
                     name="position"
@@ -105,6 +116,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                     )}
                 />
 
+                {/* Start Date */}
                 <FormField
                     control={form.control}
                     name="startDate"
@@ -119,6 +131,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                     )}
                 />
 
+                {/* Job Type */}
                 <FormField
                     control={form.control}
                     name="jobType"
@@ -148,6 +161,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                     )}
                 />
 
+                {/* Salary */}
                 <FormField
                     control={form.control}
                     name="salary"
@@ -162,28 +176,39 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                     )}
                 />
 
+                {/* Manager */}
                 <FormField
                     control={form.control}
                     name="manager"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Manager *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value} disabled={!department}>
+                            <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={!department}
+                            >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder={department ? "Select manager" : "Select department first"} />
+                                        <SelectValue
+                                            placeholder={department ? "Select manager" : "Select department first"}
+                                        />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {filteredManagers.map((manager) => (
-                                        <SelectItem key={manager} value={manager}>
-                                            {manager}
+                                        <SelectItem key={manager.id} value={manager.id}>
+                                            {manager.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
-                            {!department && <p className="text-sm text-muted-foreground">Please select a department first</p>}
+                            {!department && (
+                                <p className="text-sm text-muted-foreground">
+                                    Please select a department first
+                                </p>
+                            )}
                         </FormItem>
                     )}
                 />

@@ -7,14 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Form } from "@/components/ui/form"
-// import { JobDetailsStep } from "./onboarding-steps/job-details-step"
-// import { SkillsPreferencesStep } from "./onboarding-steps/skills-preferences-step"
-// import { EmergencyContactStep } from "./onboarding-steps/emergency-contact-step"
-// import { ReviewSubmitStep } from "./onboarding-steps/review-submit-step"
 
 import {
     personalInfoSchema,
-
     jobDetailsSchema,
     skillsPreferencesSchema,
     emergencyContactSchema,
@@ -71,35 +66,29 @@ const steps = [
 export function EmployeeOnboardingForm() {
     const [currentStep, setCurrentStep] = useState(1)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-
+    const [formData, setFormData] = useState<FormData>(initialFormData)
 
     const form = useForm<FormData>({
         resolver: zodResolver(completeFormSchema),
-        defaultValues: initialFormData,
+        defaultValues: formData,
         // mode: "onChange",
     })
 
-    const { watch, trigger, getValues, reset } = form
+    const { watch, trigger } = form
 
     const formValues = watch()
 
+
+
     useEffect(() => {
-        const savedData = localStorage.getItem("employee-onboarding-form")
-        if (savedData) {
-            try {
-                const parsed = JSON.parse(savedData)
-                reset(parsed)
-            } catch (error) {
-                console.error("Failed to parse saved form data:", error)
+        setFormData((prev) => {
+            // shallow compare to avoid unnecessary updates
+            if (JSON.stringify(prev) !== JSON.stringify(formValues)) {
+                return formValues
             }
-        }
-    }, [reset])
-
-    useEffect(() => {
-        localStorage.setItem("employee-onboarding-form", JSON.stringify(formValues))
-        setHasUnsavedChanges(true)
+            return prev
+        })
     }, [formValues])
-
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasUnsavedChanges) {
@@ -170,7 +159,7 @@ export function EmployeeOnboardingForm() {
     const onSubmit = (data: FormData) => {
         const transformedData = {
             ...data,
-            phone: data.phone.replace(/\D/g, ""),
+            phone: data?.phone.replace(/\D/g, ""),
             salary: Number.parseFloat(data.salary),
             age: calculateAge(data.dateOfBirth),
             isMinor: calculateAge(data.dateOfBirth) < 21,

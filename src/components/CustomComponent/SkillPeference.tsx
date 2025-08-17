@@ -1,44 +1,98 @@
 "use client"
 
 import type { UseFormReturn } from "react-hook-form"
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import {
+    FormField,
+    FormItem,
+    FormLabel,
+    FormControl,
+    FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X } from "lucide-react"
 import { FormData } from "@/lib/validateSchemas"
-
 
 interface SkillsPreferencesStepProps {
     form: UseFormReturn<FormData>
 }
 
 const skillsByDepartment: Record<string, string[]> = {
-    Engineering: ["JavaScript", "Python", "React", "Node.js", "SQL", "AWS", "Docker", "Git"],
-    Marketing: ["SEO", "Content Marketing", "Social Media", "Analytics", "Email Marketing", "PPC"],
-    Sales: ["CRM", "Lead Generation", "Negotiation", "Customer Relations", "Sales Analytics"],
-    HR: ["Recruitment", "Employee Relations", "Performance Management", "Training", "Compliance"],
-    Finance: ["Financial Analysis", "Budgeting", "Excel", "QuickBooks", "Tax Preparation", "Auditing"],
-    Operations: ["Project Management", "Process Improvement", "Supply Chain", "Quality Control"],
-    Design: ["Figma", "Photoshop", "UI/UX Design", "Prototyping", "Brand Design", "Illustration"],
+    Engineering: [
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Node.js",
+        "GraphQL",
+        "Docker",
+        "CI/CD",
+        "Microservices",
+        "Unit Testing",
+    ],
+    Marketing: [
+        "SEO",
+        "Content Writing",
+        "Google Ads",
+        "Social Media Marketing",
+        "Email Marketing",
+        "Brand Management",
+        "Copywriting",
+        "Video Editing",
+    ],
+    Sales: [
+        "CRM Software",
+        "Lead Generation",
+        "Cold Calling",
+        "Upselling",
+        "Negotiation",
+        "Client Relationship Management",
+        "B2B Sales",
+        "Territory Management",
+    ],
+    HR: [
+        "Recruitment",
+        "Onboarding",
+        "Conflict Resolution",
+        "Payroll Management",
+        "Compliance",
+        "Employee Training",
+        "Performance Review",
+    ],
+    Finance: [
+        "Budgeting",
+        "Financial Analysis",
+        "Accounting",
+        "Bookkeeping",
+        "Payroll Processing",
+        "Tax Compliance",
+        "Expense Reporting",
+        "Cash Flow Management",
+    ],
 }
 
 export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
     const [newSkill, setNewSkill] = useState("")
     const [newExperience, setNewExperience] = useState("")
+    const [availableSkills, setAvailableSkills] = useState<string[]>([])
 
     const department = form.watch("department")
     const skills = form.watch("skills")
-    const workingHours = form.watch("workingHours")
     const remotePreference = form.watch("remotePreference")
-    const managerApproved = form.watch("managerApproved")
     const notes = form.watch("notes")
 
-    const availableSkills = department ? skillsByDepartment[department] || [] : []
+    // Filter available skills whenever department changes
+    useEffect(() => {
+        if (department) {
+            setAvailableSkills(skillsByDepartment[department] || [])
+        } else {
+            setAvailableSkills([])
+        }
+    }, [department])
 
     const addSkill = (skillName: string) => {
         if (skillName && !skills.some((s) => s.skill === skillName)) {
@@ -51,7 +105,9 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
         if (newSkill.trim() && newExperience.trim()) {
             addSkill(newSkill.trim())
             const updatedSkills = skills.map((s) =>
-                s.skill === newSkill.trim() ? { ...s, experience: newExperience.trim() } : s,
+                s.skill === newSkill.trim()
+                    ? { ...s, experience: newExperience.trim() }
+                    : s,
             )
             form.setValue("skills", updatedSkills)
             setNewSkill("")
@@ -65,7 +121,9 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
     }
 
     const updateSkillExperience = (skillName: string, experience: string) => {
-        const updatedSkills = skills.map((s) => (s.skill === skillName ? { ...s, experience } : s))
+        const updatedSkills = skills.map((s) =>
+            s.skill === skillName ? { ...s, experience } : s,
+        )
         form.setValue("skills", updatedSkills)
     }
 
@@ -83,12 +141,14 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
             <FormField
                 control={form.control}
                 name="skills"
-                render={({ field }) => (
+                render={() => (
                     <FormItem>
                         <FormLabel>Skills * (Select at least 3)</FormLabel>
                         <div className="space-y-4">
                             <p className="text-sm text-muted-foreground">
-                                {department ? `Skills for ${department}:` : "Please select a department first"}
+                                {department
+                                    ? `Skills for ${department}:`
+                                    : "Please select a department first"}
                             </p>
 
                             {department && (
@@ -96,7 +156,11 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
                                     {availableSkills.map((skill) => (
                                         <Button
                                             key={skill}
-                                            variant={skills.some((s) => s.skill === skill) ? "default" : "outline"}
+                                            variant={
+                                                skills.some((s) => s.skill === skill)
+                                                    ? "default"
+                                                    : "outline"
+                                            }
                                             size="sm"
                                             type="button"
                                             onClick={() => addSkill(skill)}
@@ -110,13 +174,21 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
 
                             {/* Custom Skill Input */}
                             <div className="flex gap-2">
-                                <Input placeholder="Add custom skill" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} />
+                                <Input
+                                    placeholder="Add custom skill"
+                                    value={newSkill}
+                                    onChange={(e) => setNewSkill(e.target.value)}
+                                />
                                 <Input
                                     placeholder="Years of experience"
                                     value={newExperience}
                                     onChange={(e) => setNewExperience(e.target.value)}
                                 />
-                                <Button type="button" onClick={addCustomSkill} disabled={!newSkill.trim() || !newExperience.trim()}>
+                                <Button
+                                    type="button"
+                                    onClick={addCustomSkill}
+                                    disabled={!newSkill.trim() || !newExperience.trim()}
+                                >
                                     Add
                                 </Button>
                             </div>
@@ -124,15 +196,25 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
                             {/* Selected Skills */}
                             <div className="space-y-3">
                                 {skills.map((skillItem) => (
-                                    <div key={skillItem.skill} className="flex items-center gap-3 p-3 border rounded-lg">
+                                    <div
+                                        key={skillItem.skill}
+                                        className="flex items-center gap-3 p-3 border rounded-lg"
+                                    >
                                         <Badge variant="secondary">{skillItem.skill}</Badge>
                                         <Input
                                             placeholder="Years of experience"
                                             value={skillItem.experience}
-                                            onChange={(e) => updateSkillExperience(skillItem.skill, e.target.value)}
+                                            onChange={(e) =>
+                                                updateSkillExperience(skillItem.skill, e.target.value)
+                                            }
                                             className="flex-1"
                                         />
-                                        <Button variant="ghost" size="sm" type="button" onClick={() => removeSkill(skillItem.skill)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            type="button"
+                                            onClick={() => removeSkill(skillItem.skill)}
+                                        >
                                             <X className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -181,7 +263,9 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
                 name="remotePreference"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Remote Work Preference: {remotePreference}%</FormLabel>
+                        <FormLabel>
+                            Remote Work Preference: {remotePreference}%
+                        </FormLabel>
                         <FormControl>
                             <Slider
                                 value={[field.value]}
@@ -203,7 +287,10 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
                     render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
-                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
                             </FormControl>
                             <div className="space-y-1 leading-none">
                                 <FormLabel>Manager Approved</FormLabel>
@@ -232,7 +319,9 @@ export function SkillsPreferencesStep({ form }: SkillsPreferencesStepProps) {
                                 className="min-h-[100px]"
                             />
                         </FormControl>
-                        <p className="text-sm text-muted-foreground">{notes.length}/500 characters</p>
+                        <p className="text-sm text-muted-foreground">
+                            {notes?.length}/500 characters
+                        </p>
                         <FormMessage />
                     </FormItem>
                 )}
