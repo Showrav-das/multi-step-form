@@ -1,27 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Form } from "@/components/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 
 import {
-    personalInfoSchema,
-    jobDetailsSchema,
-    skillsPreferencesSchema,
     emergencyContactSchema,
+    jobDetailsSchema,
+    personalInfoSchema,
     reviewSubmitSchema,
+    skillsPreferencesSchema,
     type FormData,
 } from "@/lib/validateSchemas"
 import { toast } from "sonner"
-import { PersonalInfoStep } from "./CustomComponent/PersonalInfoForm"
-import { JobDetailsStep } from "./CustomComponent/JobDetailsForm"
-import { SkillsPreferencesStep } from "./CustomComponent/SkillPeference"
 import { EmergencyContactStep } from "./CustomComponent/ContactInformation"
+import { JobDetailsStep } from "./CustomComponent/JobDetailsForm"
+import { PersonalInfoStep } from "./CustomComponent/PersonalInfoForm"
 import { ReviewSubmitStep } from "./CustomComponent/Review&FinalSubmit"
+import { SkillsPreferencesStep } from "./CustomComponent/SkillPeference"
+import Stepper from "./CustomComponent/Stepper"
+
+
 
 
 const completeFormSchema = personalInfoSchema
@@ -193,15 +195,7 @@ export function EmployeeOnboardingForm() {
 
     return (
         <div className="space-y-3 max-w-6xl mx-auto my-12">
-            <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>
-                        Step {currentStep} of {steps.length}
-                    </span>
-                    <span>{Math.round(progress)}% Complete</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-            </div>
+            <Stepper currentStep={currentStep} progress={progress} steps={steps} />
 
             <div className="flex justify-between">
                 {steps.map((step) => (
