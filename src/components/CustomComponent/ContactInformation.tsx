@@ -23,7 +23,7 @@ export function EmergencyContactStep({ form }: EmergencyContactStepProps) {
     }
 
     const dateOfBirth = form.watch("dateOfBirth")
-    const guardianContact = form.watch("guardianContact")
+
 
     const age = calculateAge(dateOfBirth)
     const isMinor = age < 21
@@ -32,7 +32,7 @@ export function EmergencyContactStep({ form }: EmergencyContactStepProps) {
         <div className="space-y-6">
             {/* Emergency Contact */}
             <div>
-                <h3 className="text-lg font-semibold mb-4">Emergency Contact *</h3>
+                {/* <h3 className="text-lg font-semibold mb-4">Emergency Contact *</h3> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}

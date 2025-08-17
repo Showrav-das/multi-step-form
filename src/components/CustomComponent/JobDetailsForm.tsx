@@ -10,7 +10,7 @@ interface JobDetailsStepProps {
     form: UseFormReturn<FormData>
 }
 
-const departments = ["Engineering", "Marketing", "Sales", "HR", "Finance", "Operations", "Design"]
+const departments = ["Engineering", "Marketing", "Sales", "HR", "Finance",]
 
 const mockManagers = [
     { id: "ENG001", name: "Alice Johnson", department: "Engineering" },
@@ -84,7 +84,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                                 value={field.value}
                             >
                                 <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select department" />
                                     </SelectTrigger>
                                 </FormControl>
@@ -146,7 +146,7 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                                 value={field.value}
                             >
                                 <FormControl>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-full">
                                         <SelectValue />
                                     </SelectTrigger>
                                 </FormControl>
@@ -189,21 +189,20 @@ export function JobDetailsStep({ form }: JobDetailsStepProps) {
                                 disabled={!department}
                             >
                                 <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue
-                                            placeholder={department ? "Select manager" : "Select department first"}
-                                        />
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder={department ? "Select manager" : "Select department first"} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {filteredManagers.map((manager) => (
-                                        <SelectItem key={manager.id} value={manager.id}>
+                                        <SelectItem key={manager.id} value={manager.name}>
                                             {manager.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
+
                             {!department && (
                                 <p className="text-sm text-muted-foreground">
                                     Please select a department first

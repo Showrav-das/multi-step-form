@@ -159,7 +159,7 @@ export function EmployeeOnboardingForm() {
     const onSubmit = (data: FormData) => {
         const transformedData = {
             ...data,
-            phone: data?.phone.replace(/\D/g, ""),
+            phone: (data.phone ?? "").replace(/\D/g, ""),
             salary: Number.parseFloat(data.salary),
             age: calculateAge(data.dateOfBirth),
             isMinor: calculateAge(data.dateOfBirth) < 21,
